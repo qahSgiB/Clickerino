@@ -301,72 +301,81 @@ class TriangleConnectComparable():
         aPoints = list(map(self.engine.calculatePoint, [self.triangle.point1, self.triangle.point2, self.triangle.point3]))
         bPoints = list(map(self.engine.calculatePoint, [other.triangle.point1, other.triangle.point2, other.triangle.point3]))
 
-        intersections = []
-        for aPoint1Index in range(len(aPoints)-1):
-            aPoint1 = aPoints[aPoint1Index]
-            for aPoint2Index in range(aPoint1Index+1, len(aPoints)):
-                aPoint2 = aPoints[aPoint2Index]
+        aInB = False
 
-                for bPoint1Index in range(len(bPoints)-1):
-                    bPoint1 = bPoints[bPoint1Index]
-                    for bPoint2Index in range(bPoint1Index+1, len(bPoints)):
-                        bPoint2 = bPoints[bPoint2Index]
+        s = lambda linePoint1, linePoint2, point: 
 
-                        a = aPoint1
-                        b = aPoint2
-                        c = bPoint1
-                        d = bPoint2
+        a0InB =
 
-                        n1 = (c[0]-d[0])*(a[1]-b[1])-(c[1]-d[1])*(a[0]-b[0])
-                        n2 = ((d[1]-b[1])*(a[0]-b[0])-(d[0]-b[0])*(a[1]-b[1]))
-                        if n1 != 0:
-                            n = n2/n1
-                            m = ((b[1]-d[1])*(c[0]-d[0])-(b[0]-d[0])*(c[1]-d[1]))/(a[0]-b[0])*(c[1]-d[1])-(a[1]-b[1])*(c[0]-d[0])
-
-                            intersection = d+(c-d)*n
-                            m = (intersection-b)[0]/(a-b)[0]
-
-                            if n >= 0.0001 and n <= 1-0.0001 and m >= 0.0001 and m <= 1-0.0001:
-                                intersections.append(intersection)
-
-        if len(intersections) == 0:
+        if aInB:
             return 0
         else:
-            for intersection in intersections:
-                v = self.engine.camera.direction+self.engine.camera.viewVectors[0]*(intersection[0]-0.5)+self.engine.camera.viewVectors[1]*(intersection[1]-0.5)
+            intersections = []
+            for aPoint1Index in range(len(aPoints)-1):
+                aPoint1 = aPoints[aPoint1Index]
+                for aPoint2Index in range(aPoint1Index+1, len(aPoints)):
+                    aPoint2 = aPoints[aPoint2Index]
 
-                p1 = self.triangle.point1
-                p2 = self.triangle.point2
-                p3 = self.triangle.point3
+                    for bPoint1Index in range(len(bPoints)-1):
+                        bPoint1 = bPoints[bPoint1Index]
+                        for bPoint2Index in range(bPoint1Index+1, len(bPoints)):
+                            bPoint2 = bPoints[bPoint2Index]
 
-                p4 = self.engine.camera.center
-                p5 = p4+v
-                p6 = v
+                            a = aPoint1
+                            b = aPoint2
+                            c = bPoint1
+                            d = bPoint2
 
-                t1 = (p2[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p2[1]*p4[2]-p4[1]*p2[2])+p4[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p4[2]-p4[1]*p2[2])-p2[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p2[2]-p2[1]*p1[2]))-(p1[0]*(p2[1]*p3[2]-p3[1]*p2[2])-p2[0]*(p1[1]*p3[2]-p3[1]*p1[2])+p3[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
-                t2 = (p2[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p2[1]*p6[2]-p6[1]*p2[2])+p6[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p6[2]-p6[1]*p2[2])-p2[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
-                t = -t1/t2
+                            n1 = (c[0]-d[0])*(a[1]-b[1])-(c[1]-d[1])*(a[0]-b[0])
+                            n2 = ((d[1]-b[1])*(a[0]-b[0])-(d[0]-b[0])*(a[1]-b[1]))
+                            if n1 != 0:
+                                n = n2/n1
+                                m = ((b[1]-d[1])*(c[0]-d[0])-(b[0]-d[0])*(c[1]-d[1]))/(a[0]-b[0])*(c[1]-d[1])-(a[1]-b[1])*(c[0]-d[0])
 
-                triangle1Distance = (p6*t).getLength()
+                                intersection = d+(c-d)*n
+                                m = (intersection-b)[0]/(a-b)[0]
 
-                p1 = other.triangle.point1
-                p2 = other.triangle.point2
-                p3 = other.triangle.point3
+                                if n >= 0.0001 and n <= 1-0.0001 and m >= 0.0001 and m <= 1-0.0001:
+                                    intersections.append(intersection)
 
-                p4 = self.engine.camera.center
-                p5 = p4+v
-                p6 = v
+            if len(intersections) == 0:
+                return 0
+            else:
+                for intersection in intersections:
+                    v = self.engine.camera.direction+self.engine.camera.viewVectors[0]*(intersection[0]-0.5)+self.engine.camera.viewVectors[1]*(intersection[1]-0.5)
 
-                t1 = (p2[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p2[1]*p4[2]-p4[1]*p2[2])+p4[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p4[2]-p4[1]*p2[2])-p2[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p2[2]-p2[1]*p1[2]))-(p1[0]*(p2[1]*p3[2]-p3[1]*p2[2])-p2[0]*(p1[1]*p3[2]-p3[1]*p1[2])+p3[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
-                t2 = (p2[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p2[1]*p6[2]-p6[1]*p2[2])+p6[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p6[2]-p6[1]*p2[2])-p2[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
-                t = -t1/t2
+                    p1 = self.triangle.point1
+                    p2 = self.triangle.point2
+                    p3 = self.triangle.point3
 
-                triangle2Distance = (p6*t).getLength()
+                    p4 = self.engine.camera.center
+                    p5 = p4+v
+                    p6 = v
 
-                if triangle1Distance-triangle2Distance != 0:
-                    return triangle1Distance-triangle2Distance
+                    t1 = (p2[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p2[1]*p4[2]-p4[1]*p2[2])+p4[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p4[2]-p4[1]*p2[2])-p2[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p2[2]-p2[1]*p1[2]))-(p1[0]*(p2[1]*p3[2]-p3[1]*p2[2])-p2[0]*(p1[1]*p3[2]-p3[1]*p1[2])+p3[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
+                    t2 = (p2[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p2[1]*p6[2]-p6[1]*p2[2])+p6[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p6[2]-p6[1]*p2[2])-p2[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
+                    t = -t1/t2
 
-        return 0
+                    triangle1Distance = (p6*t).getLength()
+
+                    p1 = other.triangle.point1
+                    p2 = other.triangle.point2
+                    p3 = other.triangle.point3
+
+                    p4 = self.engine.camera.center
+                    p5 = p4+v
+                    p6 = v
+
+                    t1 = (p2[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p2[1]*p4[2]-p4[1]*p2[2])+p4[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p4[2]-p4[1]*p3[2])-p3[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p4[2]-p4[1]*p2[2])-p2[0]*(p1[1]*p4[2]-p4[1]*p1[2])+p4[0]*(p1[1]*p2[2]-p2[1]*p1[2]))-(p1[0]*(p2[1]*p3[2]-p3[1]*p2[2])-p2[0]*(p1[1]*p3[2]-p3[1]*p1[2])+p3[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
+                    t2 = (p2[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p2[1]*p6[2]-p6[1]*p2[2])+p6[0]*(p2[1]*p3[2]-p3[1]*p2[2]))-(p1[0]*(p3[1]*p6[2]-p6[1]*p3[2])-p3[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p3[2]-p3[1]*p1[2]))+(p1[0]*(p2[1]*p6[2]-p6[1]*p2[2])-p2[0]*(p1[1]*p6[2]-p6[1]*p1[2])+p6[0]*(p1[1]*p2[2]-p2[1]*p1[2]))
+                    t = -t1/t2
+
+                    triangle2Distance = (p6*t).getLength()
+
+                    if triangle1Distance-triangle2Distance != 0:
+                        return triangle1Distance-triangle2Distance
+
+            return 0
 
 class TriangleConnect(Fillable):
     def __init__(self, point1, point2, point3, fill=None):
