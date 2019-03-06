@@ -16,34 +16,6 @@ class Engine32():
 
         intersections = []
         for borderLine in self.camera.getBorderLines():
-            # a = pointPlane.point
-            # b = pointPlane.vectors[0]
-            # c = pointPlane.vectors[1]
-            #
-            # d = borderLine.point
-            # e = borderLine.vectors[0]
-            #
-            # if c[1]*e[0]-e[1]*c[0] == 0:
-            #     if c[2]*e[0]-e[2]*c[0] == 0:
-            #         f = 1
-            #     else:
-            #         return None
-            # else:
-            #     f = (c[2]*e[0]-e[2]*c[0])/(c[1]*e[0]-e[1]*c[0])
-            # k = (d[2]*e[0]-e[2]*d[0]-a[2]*e[0]+e[2]*a[0]-f*(d[1]*e[0]-e[1]*d[0]-a[1]*e[0]+e[1]*a[0]))/(b[2]*e[0]-e[2]*b[0]-f*(b[1]*e[0]-e[1]*b[0]))
-            # if c[2]*e[0]-e[2]*c[0] == 0:
-            #     if d[2]*e[0]-e[2]*d[0]-a[2]*e[0]+e[2]*a[0]-k*(b[2]*e[0]-e[2]*b[0]) != 0:
-            #         return None
-            #     else:
-            #         l = (d[1]*e[0]-e[1]*d[0]-a[1]*e[0]+e[1]*a[0]-k*(b[1]*e[0]-e[1]*b[0]))/(c[1]*e[0]-e[1]*c[0])
-            # else:
-            #     l = (d[2]*e[0]-e[2]*d[0]-a[2]*e[0]+e[2]*a[0]-k*(b[2]*e[0]-e[2]*b[0]))/(c[2]*e[0]-e[2]*c[0])
-            #
-            # x = a[0]+b[0]*k+c[0]*l
-            # y = a[1]+b[1]*k+c[1]*l
-            # z = a[2]+b[2]*k+c[2]*l
-            #
-            # intersections.append(Point([x, y, z]))
 
             p1 = pointPlane.point
             p2 = p1+pointPlane.vectors[0]
@@ -303,9 +275,9 @@ class TriangleConnectComparable():
 
         aInB = False
 
-        s = lambda linePoint1, linePoint2, point: 
-
-        a0InB =
+        # s = lambda linePoint1, linePoint2, point:
+        #
+        # a0InB =
 
         if aInB:
             return 0
