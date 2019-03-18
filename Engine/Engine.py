@@ -68,8 +68,6 @@ class Engine():
             if abs(min(face12DX)-max(face22DX)) <= self.tre or abs(max(face12DX)-min(face22DX)) <= self.tre or abs(min(face12DY)-max(face22DY)) <= self.tre or abs(max(face12DY)-min(face22DY)) <= self.tre:
                 return 0
 
-            intersections = []
-
             combs = [
                 ((0, 1), (0, 1)),
                 ((0, 1), (1, 2)),
@@ -130,8 +128,6 @@ class Engine():
                             break
 
             if order == 0:
-                points = []
-
                 v = face22D[1]-face22D[0]
                 u = face22D[2]-face22D[1]
                 det = v[0]*u[1]-v[1]*u[0]
@@ -251,15 +247,19 @@ class Engine():
                 if faceNeeded[faceAfter] == 0:
                     faceQueue.put(faceAfter)
 
-        for faceIndex in range(facesCount):
-            if faceNeeded[faceIndex] != 0:
-                print(faceIndex, faceNeeded[faceIndex], facesAfter[faceIndex])
+        # for faceIndex in range(facesCount):
+        #     if faceNeeded[faceIndex] != 0:
+        #         print(faceIndex, faceNeeded[faceIndex], facesAfter[faceIndex])
 
         faces = []
         for faceIndex in facesOrdered:
             face = objectFaces[faceIndex]
             faces.append((numpy.array([objectPoints2D[face[0]], objectPoints2D[face[1]], objectPoints2D[face[2]]]), objectMaterials[faceIndex]))
-        faces = numpy.stack(faces)
+        
+        if len(faces) > 0:
+            faces = numpy.stack(faces)
+        else:
+            faces = numpy.array([])
 
         return faces
 
@@ -276,36 +276,87 @@ class Object():
         self.faces = faces
         self.materials = materials
 
+    @staticmethod
     def loadFromFile(folderPath):
         points = []
         faces = []
         materials = []
 
+        lines = None
         with open(folderPath+'/object.obj', 'r') as file:
             lines = file.read().split('\n')
 
-            materialsDict = None
-            activeMaterial = None
+        materialsDict = None
+        activeMaterial = None
 
-            for line in lines:
-                if len(line) > 0:
-                    infos = line.split(' ')
-                    infoType = infos[0]
+        faceIndex = 0
+        for line in lines:
+            if len(line) > 0:
+                infos = line.split(' ')
+                infoType = infos[0]
 
-                    if infoType == 'mtllib':
-                        materialsDict = Material.loadFromFile(folderPath)
-                    if infoType == 'usemtl':
-                        activeMaterial = infos[1]
-                    if infoType == 'v':
-                        points.append(numpy.array([float(infos[1]), float(infos[2]), float(infos[3])]))
-                    elif infoType == 'f':
-                        faces.append(numpy.array([int(infos[1])-1, int(infos[2])-1, int(infos[3])-1]))
+                if infoType == 'mtllib':
+                    materialsDict = Material.loadFromFile(folderPath)
+                if infoType == 'usemtl':
+                    activeMaterial = infos[1]
+                if infoType == 'v':
+                    points.append(numpy.array([float(infos[1]), float(infos[2]), float(infos[3])]))
+                elif infoType == 'f':
+                    # if faceIndex in []:
+                    faces.append(numpy.array([int(infos[1])-1, int(infos[2])-1, int(infos[3])-1]))
+                    # faceIndex += 1
 
-                        if activeMaterial != None:
-                            materials.append(materialsDict[activeMaterial])
-                        else:
-                            materials.append(None)
+                    if activeMaterial != None:
+                        materials.append(materialsDict[activeMaterial])
+                    else:
+                        materials.append(None)
 
+        newFaces = []
+        faceIndex = 0
+        for face in faces:
+            point0 = points[face[0]]
+            point1 = points[face[1]]
+            point2 = points[face[2]]
+
+            tres = 0.00005
+
+            parallel = None
+            u = point0-point1
+            v = point0-point2
+
+            k0State = (0 if u[0] != 0 else 1)+(0 if v[0] != 0 else 1)
+            k0 = u[0]/v[0] if k0State == 0 else 0
+            k1State = (0 if u[1] != 0 else 1)+(0 if v[1] != 0 else 1)
+            k1 = u[1]/v[1] if k1State == 0 else 0
+            k2State = (0 if u[2] != 0 else 1)+(0 if v[2] != 0 else 1)
+            k2 = u[2]/v[2] if k2State == 0 else 0
+
+            print(k0State, k0, k1State, k1 ,k2State, k2)
+
+            if k0State == 1 or k1State == 1 or k2State == 1:
+                parallel = False
+            else:
+                ks = []
+                if k0State == 0:
+                    ks.append(k0)
+                if k1State == 0:
+                    ks.append(k1)
+                if k2State == 0:
+                    ks.append(k2)
+
+                if len(ks) == 3:
+                    parallel = abs(ks[0]-ks[1]) < tres and abs(ks[0]-ks[2]) < tres
+                elif len(ks) == 2:
+                    parallel = abs(ks[0]-ks[1]) < tres
+                elif len(ks) == 1:
+                    parallel = True
+
+            if not parallel:
+                newFaces.append(face)
+
+            faceIndex += 1
+        faces = newFaces
+        
         return Object(numpy.stack(points), numpy.stack(faces), materials)
 
 class Material():
@@ -313,6 +364,7 @@ class Material():
         self.name = name
         self.color = color
 
+    @staticmethod
     def loadFromFile(folderPath):
         materials = {}
 
@@ -456,11 +508,12 @@ class Demo():
 def test():
     import tkinter
 
-    cube = Object.loadFromFile('3DObjects/spaceShip')
+    object3D = Object.loadFromFile('3DObjects/spaceShip4')
 
     canvasSize = numpy.array([500, 500])
 
-    demo = Demo(canvasSize, cube, 20, True, 5).run()
+    demo = Demo(canvasSize, object3D, 8, True, 40)
+    demo.run()
 
 
 
